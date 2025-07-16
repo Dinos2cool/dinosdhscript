@@ -1,0 +1,163 @@
+getgenv().Owner = "OWNER_USERNAME_HERE"  -- Replace with your Roblox username
+
+getgenv().Configuration = {
+    ['Msg'] = 'Yare Yare Daze.',
+    ['CrewID'] = 32570691,
+    ['Attack'] = 'Heavy',
+    ['TPMode'] = "Cart",
+    ['GunMode'] = 'Under',
+    ['FlyMode'] = 'Glide',
+    ['Position'] = 'Back',
+    ['Resolver'] = false,
+    ['ChatCmds'] = true,
+    ['AutoMask'] = true,
+    ['MaskMode'] = 'Breathing',
+    ['AntiStomp'] = true,
+    ['StandMode'] = 'Star Platinum : OverHeaven',
+    ['Smoothing'] = false,
+    ['AttackMode'] = 'Sky',
+    ['CustomName'] = 'Master',
+    ['Hidescreen'] = false,
+    ['SummonPoses'] = 'Pose3',
+    ['LowGraphics'] = false,
+    ['CustomPrefix'] = '.',
+    ['CustomSummon'] = 'Summon!',
+    ['GunPrediction'] = 0.037,
+    ['AutoPrediction'] = false,
+    ['AttackDistance'] = 75,
+    ['AutoSaveLocation'] = 'Downhill_Rooftop',
+    ['AttackPrediction'] = 0.34,
+    ['AttackAutoPrediction'] = 0.23,
+    ['Sounds'] = true,
+    ['CustomSong'] = 123456,
+    ['SummonMusic'] = true,
+    ['HideBoombox'] = true,
+    ['SummonMusicID'] = 'Default'
+}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local config = getgenv().Configuration
+
+local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
+local KnockdownEvent = ReplicatedStorage:WaitForChild("KnockdownEvent")
+local TransferStandEvent = ReplicatedStorage:WaitForChild("TransferStandEvent")
+
+-- Anti AFK
+for _, v in ipairs(getconnections(LocalPlayer.Idled)) do
+    v:Disable()
+end
+
+-- Anti-Stomp / Anti-Grab
+if config.AntiStomp then
+    for _, partName in pairs({"Head", "UpperTorso", "LowerTorso"}) do
+        local part = Character:FindFirstChild(partName)
+        if part then
+            part.CanCollide = false
+        end
+    end
+end
+
+-- Hide Screen
+if config.Hidescreen then
+    local screen = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+    screen.Name = "WhiteOut"
+    local frame = Instance.new("Frame", screen)
+    frame.BackgroundColor3 = Color3.new(1, 1, 1)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.ZIndex = 999
+end
+
+-- Chat Commands with Da Hood logic
+if config.ChatCmds then
+    local autokillEnabled = false
+    local autokillTarget = nil
+
+    LocalPlayer.Chatted:Connect(function(msg)
+        if LocalPlayer.Name ~= getgenv().Owner then return end
+
+        local prefix = config.CustomPrefix or "."
+        local lower = msg:lower()
+
+        if lower == prefix .. "msg" then
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(config.Msg, "All")
+
+        elseif lower == prefix .. "summon" then
+            ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(config.CustomSummon or "Summon!", "All")
+
+        elseif lower:sub(1, #prefix + 5) == prefix .. "kill" then
+            local targetName = msg:sub(#prefix + 7)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():sub(1, #targetName) == targetName:lower() then
+                    PunchEvent:FireServer(p)
+                    break
+                end
+            end
+
+        elseif lower:sub(1, #prefix + 8) == prefix .. "autokill" then
+            local targetName = msg:sub(#prefix + 10)
+            if targetName ~= "" then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p.Name:lower():sub(1, #targetName) == targetName:lower() then
+                        autokillEnabled = true
+                        autokillTarget = p
+                        break
+                    end
+                end
+            else
+                autokillEnabled = false
+                autokillTarget = nil
+            end
+
+        elseif lower:sub(1, #prefix + 5) == prefix .. "goto" then
+            local targetName = msg:sub(#prefix + 7)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():sub(1, #targetName) == targetName:lower() then
+                    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)
+                    end
+                    break
+                end
+            end
+
+        elseif lower:sub(1, #prefix + 6) == prefix .. "bring" then
+            local targetName = msg:sub(#prefix + 8)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():sub(1, #targetName) == targetName:lower() then
+                    KnockdownEvent:FireServer(p)
+                    wait(1)
+                    if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        p.Character.HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+                    end
+                    break
+                end
+            end
+
+        elseif lower:sub(1, #prefix + 5) == prefix .. "drop" then
+            print("[Drop] Stand drop command not implemented.")
+
+        elseif lower:sub(1, #prefix + 7) == prefix .. "transfer" then
+            local targetName = msg:sub(#prefix + 9)
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():sub(1, #targetName) == targetName:lower() then
+                    TransferStandEvent:FireServer(p)
+                    getgenv().Owner = p.Name
+                    break
+                end
+            end
+        end
+    end)
+
+    task.spawn(function()
+        while true do
+            task.wait(1)
+            if autokillEnabled and autokillTarget and autokillTarget.Character and autokillTarget.Character:FindFirstChild("HumanoidRootPart") then
+                PunchEvent:FireServer(autokillTarget)
+            end
+        end
+    end)
+end
