@@ -1,0 +1,38 @@
+Dinosdhscript
+getgenv().Owner = "YourRobloxUsername"
+
+getgenv().Configuration = {
+    ['Msg'] = 'Hello from my custom script!', -- Message for chat command
+    ['CrewID'] = 11089186, -- Your Roblox group ID for required group check
+    ['Attack'] = 'Heavy', -- Options: Heavy | Light
+    ['TPMode'] = "Cart", -- Options: Knock | Cart
+    ['GunMode'] = 'Under', -- Options: Sky | Under
+    ['FlyMode'] = 'Glide', -- Options: Glide | FlyV1 | FlyV2 | Hover | Heaven
+    ['Position'] = 'Back', -- Options: Back | Left | Right | Mid | UpMid | UpLeft | Walk
+    ['Resolver'] = false, -- Anti-lock resolver for attacks (true/false)
+    ['ChatCmds'] = true, -- Stand talks to you (true/false)
+    ['AutoMask'] = true, -- Auto-buy mask when stand respawns
+    ['MaskMode'] = 'Breathing', -- Mask type: Surgeon | Paintball | Skull | Pumpkin | Hockey | Ninja | Riot | Breathing
+    ['AntiStomp'] = true, -- Prevent stand from being stomped or grabbed
+    ['StandMode'] = 'Star Platinum : OverHeaven', -- Your stand name
+    ['Smoothing'] = false, -- Smooth stand follow (true/false)
+    ['AttackMode'] = 'Sky', -- Attack mode: Sky | Under
+    ['CustomName'] = 'Master', -- Custom name the stand calls you
+    ['Hidescreen'] = false, -- Hide screen while running (true/false)
+    ['SummonPoses'] = 'Pose3', -- Pose style: false | Pose1 | Pose2 | Pose3
+    ['LowGraphics'] = false, -- Lower graphics for performance
+    ['CustomPrefix'] = '.', -- Command prefix (., /, !, ?, etc.)
+    ['CustomSummon'] = 'Summon!', -- Text for summon command
+    ['GunPrediction'] = 0.037, -- Gun prediction number
+    ['AutoPrediction'] = false, -- Auto prediction toggle
+    ['AttackDistance'] = 75, -- Max attack distance
+    ['AutoSaveLocation'] = 'Downhill_Rooftop', -- Location for autosave
+    ['AttackPrediction'] = 0.34, -- Attack prediction
+    ['AttackAutoPrediction'] = 0.23, -- Auto attack prediction
+    ['Sounds'] = true -- Enable sounds
+}
+
+-- Change this URL to your own hosted script
+local externalScriptURL = "https://yourdomain.com/your_script.lua"
+
+loadstring(game:HttpGet(externalScriptURL))()
